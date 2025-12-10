@@ -12,23 +12,25 @@ app.use(bodyParser.json());
 app.use((req, res, next) => {
     const tokenString = req.header("Authorization");
 
-    if (tokenString != null) {
-
-    
+    // No token → allow public routes
+    if (!tokenString) {
+        return next();
+    }
 
     const token = tokenString.replace("Bearer ", "");
 
     jwt.verify(token, "aviusersecret-key", (err, decoded) => {
-        if (err,decoded) {
-            return res.status(403).json({
-                message: "Invalid token"
-            });
+        if (err) {
+            return res.status(403).json({ message: "Invalid token" });
         }
-    })
-}else{
-    next()
-}
-})
+
+        // Save decoded user into request
+        req.user = decoded;
+
+        next();
+    });
+});
+
 
 mongoose.connect("mongodb+srv://admin:123@cluster0.rbs31bm.mongodb.net/?appName=Cluster0").then(()=>{
     console.log("Connected to MongoDB");

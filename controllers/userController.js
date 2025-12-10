@@ -92,14 +92,21 @@ export function loginUser(req, res) {
         });
 }
 
-export function isAdmin(req){
-    if(req.user == null){
+export function isAdmin(req) {
+    const tokenString = req.header("Authorization");
+
+    if (!tokenString) {
         return false;
     }
-    if(req.user.role !== "admin"){
+
+    const token = tokenString.replace("Bearer ", "");
+
+    try {
+        const user = jwt.verify(token, "aviusersecret-key");
+        return user.role === "admin";
+    } catch (err) {
         return false;
-        }
-        return true
     }
+}
 
  

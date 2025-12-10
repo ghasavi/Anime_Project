@@ -21,7 +21,7 @@ export async function getAnimes(req, res){
 }
 export function saveAnime(req, res){
 
-    if(isAdmin(req)){
+    if(!isAdmin(req)){
         res.status(403).json({
             message: "Only admins can add new animes"
         });
@@ -74,4 +74,65 @@ export async function deleteAnime(req, res){
                 }
             )
         }
+}
+
+export async function updateAnime(req, res){
+
+    if(!isAdmin(req)){
+        res.status(403).json({
+            message: "Only admins can update animes"
+        });
+        return;
+    }
+
+    const animeId = req.params.animeId;
+    const updateData = req.body;
+
+    try{
+        await Anime.updateOne(
+            { animeId: animeId }, 
+            updateData);
+
+            res.json({
+                message: "Anime updated successfully"
+            });
+
+    }catch(err){
+        res.status(500).json({
+            message: "Error updating anime",
+            error: err
+        });
+    }
+}
+
+export async function getAnimeById(req, res){
+    const animeId = req.params.animeId;
+
+    try{
+        const anime = await Anime.findOne(
+            { animeId: animeId });
+        
+            if(anime == null){
+                res.status(404).json({
+                    message: "Anime not found"
+                })
+                return;
+            }
+            if(anime.isAvailable){
+                res.json(anime);
+            }else{
+                if(isAdmin(req)){
+                    res.status(403).json({
+                        message: "Anime is not available"
+                    });
+                }else{
+                    res.json(anime);
+                }
+            }
+    }catch(err){
+        res.status(500).json({
+            message: "Error retrieving anime",
+            error: err
+        });
+    }   
 }
