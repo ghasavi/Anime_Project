@@ -4,6 +4,8 @@ import mongoose from 'mongoose';
 import userRouter from './routes/userRouter.js';
 import animeRouter from './routes/animeRouter.js';
 import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const app = express();
 
@@ -19,7 +21,7 @@ app.use((req, res, next) => {
 
     const token = tokenString.replace("Bearer ", "");
 
-    jwt.verify(token, "aviusersecret-key", (err, decoded) => {
+    jwt.verify(token,process.env.JWT_KEY, (err, decoded) => {
         if (err) {
             return res.status(403).json({ message: "Invalid token" });
         }
@@ -32,7 +34,7 @@ app.use((req, res, next) => {
 });
 
 
-mongoose.connect("mongodb+srv://admin:123@cluster0.rbs31bm.mongodb.net/?appName=Cluster0").then(()=>{
+mongoose.connect(process.env.MONGODB_URL).then(()=>{
     console.log("Connected to MongoDB");
 }).catch(()=>{
     console.log("MongoBD Connection failed");
