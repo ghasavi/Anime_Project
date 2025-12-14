@@ -34,11 +34,9 @@ app.use((req, res, next) => {
 });
 
 
-mongoose.connect(process.env.MONGODB_URL).then(()=>{
-    console.log("Connected to MongoDB");
-}).catch(()=>{
-    console.log("MongoBD Connection failed");
-})
+mongoose.connect(process.env.MONGODB_URL)
+  .then(() => console.log("Connected to MongoDB"))
+  .catch((err) => console.error("MongoDB Connection failed:", err));
 
 app.use("/users", userRouter);
 app.use("/animes", animeRouter);
