@@ -49,4 +49,3 @@ app.listen( 3000,
         console.log('Server is running on port 3000');
     }
 )
-//mongodb+srv://admin:123@cluster0.rbs31bm.mongodb.net/?appName=Cluster0
