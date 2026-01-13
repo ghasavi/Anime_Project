@@ -11,6 +11,7 @@ const animeSchema = mongoose.Schema({
   image: { type: String, required: true }, // main poster image
   episodes: { type: Number },
   status: { type: String, enum: ["Ongoing", "Completed", "Upcoming"], default: "Completed" },
+  isAvailable: { type: Boolean, default: true },
   createdAt: { type: Date, default: Date.now },
 });
 

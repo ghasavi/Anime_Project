@@ -6,6 +6,8 @@ const adminSchema = new mongoose.Schema(
     password: { type: String }, // empty for google-only admins
     name: String,
     img: String,
+    lastActive: { type: Date },
+    isOnline: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

@@ -57,69 +57,57 @@ export async function saveAnime(req, res) {
   }
 }
 
-export async function deleteAnime(req, res) {
-  if (!isAdmin(req)) {
-    console.warn("Unauthorized delete anime attempt");
-    return res.status(403).json({ message: "Only admins can delete animes" });
-  }
-
-  const animeId = req.params.animeId;
+export async function getAnimeById(req, res) {
+  const { animeId } = req.params;
 
   try {
-    const result = await Anime.deleteOne({ animeId });
-    console.log("Anime delete result:", result);
-    res.json({ message: "Anime deleted successfully", result });
+    const anime = await Anime.findById(animeId);
+    if (!anime) return res.status(404).json({ message: "Anime not found" });
+
+    // Admins can always access
+    if (!anime.isAvailable && !isAdmin(req)) {
+      return res.status(403).json({ message: "Anime is not available" });
+    }
+
+    res.json(anime);
   } catch (err) {
-    console.error("Error deleting anime:", err);
-    res.status(500).json({ message: "Error deleting anime", error: err });
+    console.error("Error retrieving anime:", err);
+    res.status(500).json({ message: "Error retrieving anime", error: err });
   }
 }
 
-export async function updateAnime(req, res) {
-  if (!isAdmin(req)) {
-    console.warn("Unauthorized update anime attempt");
-    return res.status(403).json({ message: "Only admins can update animes" });
-  }
 
-  const animeId = req.params.animeId;
+export async function updateAnime(req, res) {
+  if (!isAdmin(req))
+    return res.status(403).json({ message: "Only admins can update animes" });
+
+  const { animeId } = req.params;
   const updateData = req.body;
 
-  console.log("Updating anime:", animeId, "with data:", updateData);
-
   try {
-    const result = await Anime.updateOne({ animeId }, updateData);
-    console.log("Update result:", result);
-    res.json({ message: "Anime updated successfully", result });
+    const anime = await Anime.findByIdAndUpdate(animeId, updateData, { new: true });
+    if (!anime) return res.status(404).json({ message: "Anime not found" });
+
+    res.json({ message: "Anime updated successfully", anime });
   } catch (err) {
     console.error("Error updating anime:", err);
     res.status(500).json({ message: "Error updating anime", error: err });
   }
 }
 
-export async function getAnimeById(req, res) {
-  const animeId = req.params.animeId;
+export async function deleteAnime(req, res) {
+  if (!isAdmin(req))
+    return res.status(403).json({ message: "Only admins can delete animes" });
+
+  const { animeId } = req.params;
 
   try {
-    const anime = await Anime.findOne({ animeId });
-    if (!anime) {
-      console.warn("Anime not found:", animeId);
-      return res.status(404).json({ message: "Anime not found" });
-    }
+    const anime = await Anime.findByIdAndDelete(animeId);
+    if (!anime) return res.status(404).json({ message: "Anime not found" });
 
-    if (anime.isAvailable) {
-      console.log("Returning available anime:", animeId);
-      res.json(anime);
-    } else {
-      if (isAdmin(req)) {
-        console.warn("Anime is not available for admin access:", animeId);
-        res.status(403).json({ message: "Anime is not available" });
-      } else {
-        console.log("Returning unavailable anime to admin:", animeId);
-        res.json(anime);
-      }
-    }
+    res.json({ message: "Anime deleted successfully" });
   } catch (err) {
-    console.error("Error retrieving anime:", err);
-    res.status(500).json({ message: "Error retrieving anime", error: err });
+    console.error("Error deleting anime:", err);
+    res.status(500).json({ message: "Error deleting anime", error: err });
   }
 }

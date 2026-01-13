@@ -1,4 +1,5 @@
 import express from "express";
+import Admin from "../models/admin.js";
 import {
   adminLogin,
   adminGoogleLogin,
@@ -32,5 +33,21 @@ router.get("/me", verifyAdmin, (req, res) => {
     admin: req.user, // contains { _id, role }
   });
 });
+
+// GET /api/admin/active
+router.get("/active", verifyAdmin, async (req, res) => {
+  try {
+    const admins = await Admin.find()
+      .select("name email img lastActive isOnline")
+      .sort({ lastActive: -1 });
+
+    res.json({ admins });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to fetch admin activity" });
+  }
+});
+
+
 
 export default router;
