@@ -1,5 +1,6 @@
 import express from "express";
 import Admin from "../models/admin.js";
+import Anime from "../models/anime.js";
 import {
   adminLogin,
   adminGoogleLogin,
@@ -27,12 +28,22 @@ router.post("/reset-password", resetAdminPassword);
 /* =================== PROTECTED (TEST) =================== */
 
 // Test route to check token + admin
-router.get("/me", verifyAdmin, (req, res) => {
-  res.json({
-    message: "Admin authenticated",
-    admin: req.user, // contains { _id, role }
-  });
+// GET /api/admin/me
+router.get("/me", verifyAdmin, async (req, res) => {
+  try {
+    const admin = await Admin.findById(req.user._id).select("name email role img"); 
+    if (!admin) return res.status(404).json({ message: "Admin not found" });
+
+    res.json({
+      message: "Admin authenticated",
+      admin, // now includes name and email
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
 });
+
 
 // GET /api/admin/active
 router.get("/active", verifyAdmin, async (req, res) => {
@@ -48,6 +59,24 @@ router.get("/active", verifyAdmin, async (req, res) => {
   }
 });
 
+// GET /api/admin/dashboard-stats
+router.get("/dashboard-stats", verifyAdmin, async (req, res) => {
+  try {
+    const totalAnime = await Anime.countDocuments();
+    const totalAdmins = await Admin.countDocuments();
+
+    res.json({
+      totalAnime,
+      totalAdmins,
+      activeSessions: 1,     // placeholder for now
+      todayViews: 0,         // placeholder
+      recentActivity: []     // you can wire this later
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to fetch dashboard stats" });
+  }
+});
 
 
 export default router;
