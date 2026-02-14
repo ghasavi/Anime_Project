@@ -16,7 +16,7 @@ const app = express();
 /* =================== CORS =================== */
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: ["http://localhost:5173", "https://anime-project-frontend-ten.vercel.app"],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   })
