@@ -55,5 +55,5 @@ app.use("/api/animes", animeRouter);
 app.use("/api/recommend", recommendationRouter);
 
 /* =================== SERVER =================== */
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
